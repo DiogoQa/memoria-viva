@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa de Emoções - Memória Viva</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="mapa.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="map-container"></div>
+    <a href="index.html" class="back-link-map">Voltar à Página Inicial</a>
+
+    <div id="immersive-overlay" class="hidden">
+        <div id="immersive-content">
+            <p id="immersive-text"></p>
+            <audio id="immersive-audio" controls class="hidden"></audio>
+        </div>
+        <a href="index.html" class="back-link-map">Voltar à Página Inicial</a>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<script>
+    // 1. Pega os elementos do DOM
+    const map = L.map('map-container').setView([20, 0], 2);
+    const immersiveOverlay = document.getElementById('immersive-overlay');
+    const immersiveText = document.getElementById('immersive-text');
+    const immersiveAudio = document.getElementById('immersive-audio'); // Nosso novo player
+
+    // 2. Configura o mapa base
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 19
+    }).addTo(map);
+
+    // 3. Busca e desenha as memórias
+    fetch('http://127.0.0.1:8000/memorias')
+        .then(response => response.json())
+        .then(memorias => {
+            memorias.forEach(memoria => {
+                const auraMarker = L.circleMarker([memoria.lat, memoria.lon], {
+                    radius: 5,
+                    fillColor: memoria.cor_aura,
+                    color: memoria.cor_aura,
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                })
+                .addTo(map)
+                .on('click', () => {
+                    // ATUALIZAÇÃO DA LÓGICA DE CLIQUE
+                    immersiveText.textContent = memoria.texto_original;
+
+                    // Verifica se a memória tem uma URL de áudio
+                    if (memoria.audio_url) {
+                        immersiveAudio.src = memoria.audio_url; // Define a fonte do áudio
+                        immersiveAudio.classList.remove('hidden'); // Mostra o player
+                    } else {
+                        immersiveAudio.classList.add('hidden'); // Esconde o player se for só texto
+                    }
+
+                    immersiveOverlay.classList.remove('hidden'); // Mostra a tela imersiva
+                });
+            
+                const auraElement = auraMarker.getElement();
+                if (auraElement) {
+                    auraElement.classList.add('pulsing-aura');
+                    auraElement.style.boxShadow = `0 0 8px ${memoria.cor_aura}, 0 0 12px ${memoria.cor_aura}`;
+                }
+            });
+        })
+        .catch(error => console.error("Não foi possível carregar as memórias:", error));
+
+    // 4. Lógica para fechar a tela imersiva
+    immersiveOverlay.addEventListener('click', (event) => {
+        // Garante que o clique não foi dentro do player de áudio
+        if (event.target.id === 'immersive-overlay' || event.target.id === 'immersive-content') {
+            immersiveOverlay.classList.add('hidden');
+            immersiveAudio.pause(); // Para o áudio quando a janela é fechada
+            immersiveAudio.currentTime = 0;
+        }
+    });
+</script>
+</body>
+</html>

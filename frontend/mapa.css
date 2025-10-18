@@ -1,0 +1,162 @@
+/* Removemos qualquer margem do body para o mapa preencher tudo */
+body {
+    overflow: hidden; /* Esconde as barras de rolagem */
+}
+
+/* O container do mapa deve ocupar 100% da tela */
+#map-container {
+    width: 100vw;  /* 100% da largura da viewport */
+    height: 100vh; /* 100% da altura da viewport */
+    background-color: #121218; /* A mesma cor de fundo para a transição ser suave */
+}
+
+/* Link de 'Voltar' estilizado para ficar sobre o mapa */
+.back-link-map {
+    position: fixed; /* Posição fixa em relação à tela */
+    bottom: 20px;
+    left: 20px;
+    z-index: 1000; /* Garante que fique acima do mapa */
+    
+    background-color: rgba(18, 18, 24, 0.8); /* Fundo semi-transparente */
+    color: #EAEAEA;
+    padding: 10px 15px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.back-link-map:hover {
+    background-color: #EAEAEA;
+    color: #121218;
+}
+
+/* --- ESTILO DA AURA PULSANTE (VERSÃO CORRIGIDA) --- */
+
+.pulsing-aura {
+    /* Aplica a nossa nova animação */
+    animation: pulseAnimation 2.5s infinite ease-out;
+    border-radius: 50%;
+}
+
+/* A nova animação que NÃO USA 'transform' */
+@keyframes pulseAnimation {
+    0% {
+        opacity: 0.7;
+    }
+    50% {
+        opacity: 1;
+        /* Aumentamos o brilho no pico da animação, mas isso será definido no JS */
+    }
+    100% {
+        opacity: 0.7;
+    }
+}
+
+/* --- ESTILO DA EXPERIÊNCIA IMERSIVA --- */
+
+/* O fundo escuro que cobre a tela inteira */
+#immersive-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(18, 18, 24, 0.9); /* Azul-noite com 90% de opacidade */
+    z-index: 2000; /* Garante que fique acima de tudo, até do link de voltar */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 1;
+    transition: opacity 0.5s ease;
+}
+
+/* A caixa onde o texto da memória aparecerá */
+#immersive-content {
+    max-width: 600px;
+    padding: 3rem;
+    text-align: center;
+}
+
+/* O parágrafo que conterá o texto da memória */
+#immersive-text {
+    color: #EAEAEA;
+    font-size: 1.8rem;
+    font-weight: 300;
+    line-height: 1.6;
+    font-style: italic;
+}
+
+/* Classe para esconder o overlay quando ele não estiver em uso */
+#immersive-overlay.hidden {
+    opacity: 0;
+    pointer-events: none; /* Impede que o overlay invisível bloqueie cliques no mapa */
+}
+
+/* --- ESTILOS PARA GRAVAÇÃO DE ÁUDIO --- */
+
+.separator {
+    margin: 1.5rem 0;
+    color: #555;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+}
+
+.audio-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 2rem;
+}
+
+.btn-record {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background-color: transparent;
+    border: 1px solid #c0392b; /* Vermelho suave */
+    color: #c0392b;
+    width: 50%;
+    max-width: 300px;
+    padding: 1rem;
+    border-radius: 50px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-record:hover {
+    background-color: #c0392b;
+    color: #EAEAEA;
+}
+
+.btn-record.recording {
+    background-color: #c0392b;
+    color: #EAEAEA;
+    animation: pulseRecording 1.5s infinite;
+}
+
+.record-status {
+    margin-top: 1rem;
+    color: #aaa;
+    font-size: 0.9rem;
+    min-height: 1.2em; /* Evita que o layout pule quando o texto aparece */
+}
+
+@keyframes pulseRecording {
+    0% { box-shadow: 0 0 0 0 rgba(192, 57, 43, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(192, 57, 43, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(192, 57, 43, 0); }
+}
+
+#immersive-audio {
+    margin-top: 2rem;
+    width: 100%;
+}
+
+/* Garante que a classe 'hidden' funcione para o player também */
+#immersive-audio.hidden {
+    display: none;
+}

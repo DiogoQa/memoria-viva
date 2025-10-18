@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doar Memória - Memória Viva</title>
+    <link rel="stylesheet" href="style.css"> <link rel="stylesheet" href="doar.css">   <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <main class="donation-container">
+        <p class="instruction-text">Respire fundo. Não há pressa.<br>Escreva sua memória ou grave sua voz. Eunoia está aqui para escutar.</p>
+    
+        <textarea id="memory-input" class="memory-textarea" placeholder="Comece a escrever..."></textarea>
+    
+        <div class="separator">ou</div>
+
+        <div id="audio-recorder" class="audio-container">
+            <button id="record-button" class="btn btn-record">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z"/></svg>
+                Gravar Voz
+            </button>
+            <p id="record-status" class="record-status"></p>
+        </div>
+        <button id="submit-button" class="btn btn-submit"> Confiar a Eunoia </button>
+
+        <a href="index.html" class="back-link">Voltar</a>
+</main>
+
+<script>
+    // --- (Toda a lógica de seleção de elementos e gravação que já funciona) ---
+    const memoryTextarea = document.getElementById('memory-input');
+    const submitButton = document.getElementById('submit-button');
+    const recordButton = document.getElementById('record-button');
+    const recordStatus = document.getElementById('record-status');
+    let mediaRecorder;
+    let audioChunks = [];
+    let audioBlob = null;
+    recordButton.addEventListener('click', async () => { /* ...código de gravação não muda... */
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+            mediaRecorder.stop();
+            recordButton.classList.remove('recording');
+            recordButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.49 6-3.31 6-6.72h-1.7z"/></svg> Gravar Voz`;
+            recordStatus.textContent = 'Gravação finalizada. Clique em "Confiar a Eunoia".';
+            return;
+        }
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.onstart = () => { audioChunks = []; audioBlob = null; recordButton.classList.add('recording'); recordButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h12v12H6z"/></svg> Parar Gravação`; recordStatus.textContent = 'Gravando...'; };
+            mediaRecorder.ondataavailable = event => { audioChunks.push(event.data); };
+            mediaRecorder.onstop = () => { audioBlob = new Blob(audioChunks, { type: 'audio/webm' }); stream.getTracks().forEach(track => track.stop()); };
+            mediaRecorder.start();
+        } catch (error) { recordStatus.textContent = 'Permissão para microfone negada.'; }
+    });
+
+    submitButton.addEventListener('click', () => {
+        // Pede a localização ANTES de chamar a função de envio
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                // Sucesso: envia com localização
+                enviarMemoria(position.coords.latitude, position.coords.longitude);
+            },
+            () => {
+                // Erro ou negado: envia sem localização
+                enviarMemoria(null, null);
+            }
+        );
+    });
+
+    // --- A FUNÇÃO DE ENVIO MAIS ROBUSTA DE TODAS ---
+    function enviarMemoria(lat, lon) {
+        const memoryText = memoryTextarea.value;
+        const body = new FormData(); // Usaremos FormData para tudo, é mais flexível
+
+        if (audioBlob) {
+            body.append('audio_file', audioBlob, 'memoria.webm');
+        } else if (memoryText.trim() !== '') {
+            body.append('texto', memoryText);
+        } else {
+            alert('Por favor, escreva ou grave sua memória antes de confiar a Eunoia.');
+            return;
+        }
+
+        // Adiciona a localização se ela existir
+        if (lat !== null && lon !== null) {
+            body.append('lat', lat);
+            body.append('lon', lon);
+        }
+
+        // Desativa o botão para evitar cliques duplos
+        submitButton.disabled = true;
+        submitButton.textContent = "Enviando...";
+
+        fetch('http://127.0.0.1:8000/doar', {
+            method: 'POST',
+            body: body
+        })
+        .then(response => {
+            if (!response.ok) {
+                // Se a resposta não for OK, lemos como texto para ver o erro do servidor
+                return response.text().then(text => { throw new Error(text || 'Erro do Servidor') });
+            }
+            return response.json();
+        })
+        .then(result => {
+            console.log('Resposta de Eunoia (JSON):', result);
+            alert(result.mensagem || 'Sua memória foi recebida e guardada por Eunoia. Obrigado.');
+            
+            // Limpa tudo
+            memoryTextarea.value = "";
+            audioBlob = null;
+            recordStatus.textContent = "";
+            submitButton.disabled = false;
+            submitButton.textContent = "[ Confiar a Eunoia ]";
+        })
+        .catch(error => {
+            console.error('Ocorreu um erro no processo de envio:', error);
+            alert('Houve um erro ao se comunicar com Eunoia. Verifique o console para detalhes.');
+            submitButton.disabled = false;
+            submitButton.textContent = "[ Confiar a Eunoia ]";
+        });
+    }
+</script>
+</body>
+</html>

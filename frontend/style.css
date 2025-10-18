@@ -1,0 +1,95 @@
+/* Reset Básico e Configurações Globais */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #121218; /* Nosso azul-noite/cinza escuro */
+    color: #EAEAEA; /* Nosso branco-suave */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    text-align: center;
+}
+
+/* Container Principal da Boas-Vindas */
+.welcome-container {
+    width: 100%;
+    max-width: 800px;
+    padding: 2rem;
+}
+
+.welcome-content {
+    opacity: 0;
+    animation: fadeIn 2s forwards; /* Efeito de surgimento suave */
+}
+
+/* Título Principal (A Pergunta) */
+.welcome-title {
+    font-weight: 300; /* Uma fonte mais leve, menos imponente */
+    font-size: 2.5rem;
+    line-height: 1.4;
+    margin-bottom: 3rem;
+}
+
+/* Grupo de Botões */
+.button-group {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap; /* Para se adaptar bem em telas menores */
+}
+
+/* Estilo dos Botões */
+.btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    padding: 1rem 2rem;
+    border: 1px solid #EAEAEA;
+    background-color: transparent;
+    color: #EAEAEA;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 50px; /* Bordas suaves, acolhedoras */
+}
+
+.btn-primary:hover {
+    background-color: #EAEAEA;
+    color: #121218;
+}
+
+.btn-secondary {
+    border-color: #555;
+    color: #aaa;
+}
+
+.btn-secondary:hover {
+    background-color: #555;
+    color: #EAEAEA;
+}
+
+/* Animação de Fade In */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Media Query para Celulares */
+@media (max-width: 600px) {
+    .welcome-title {
+        font-size: 1.8rem;
+    }
+    .button-group {
+        flex-direction: column;
+    }
+}
