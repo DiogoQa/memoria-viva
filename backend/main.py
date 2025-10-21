@@ -185,3 +185,4 @@ def read_root():
 print("✅ Eunoia está pronta e esperando por memórias.")
 
 
+# Forçando o redeploy no Railway
