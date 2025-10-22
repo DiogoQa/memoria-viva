@@ -40,7 +40,7 @@
     }).addTo(map);
 
     // 3. Busca e desenha as memórias
-    fetch('http://127.0.0.1:8000/memorias')
+    fetch('https://web-production-d128a.up.railway.app/memorias')
         .then(response => response.json())
         .then(memorias => {
             memorias.forEach(memoria => {
