@@ -62,9 +62,9 @@ print("✅ Conexão com o Cloudinary estabelecida.")
 app = FastAPI()
 
 origins = [
-    "https://memoria-viva-pi.vercel.app", # Seu site online
-    # Você pode adicionar http://localhost... se quiser testar localmente também
-    # "http://127.0.0.1:5500", # Exemplo se você usa Live Server
+    "https://memoria-viva-g2yfwmmfl-diogos-projects-f943f9ad.vercel.app", # A URL CORRETA
+    # Você pode manter a URL antiga também, se quiser, ou adicionar a URL principal (sem o g2yfw...)
+    "https://memoria-viva-pi.vercel.app", 
 ]
 app.add_middleware(
     CORSMiddleware,
