@@ -40,7 +40,7 @@
     }).addTo(map);
 
     // 3. Busca e desenha as memórias
-    fetch('https://web-production-d128a.up.railway.app/memorias')
+    fetch('https://memoria-viva-backend.onrender.com/memorias')
         .then(response => response.json())
         .then(memorias => {
             memorias.forEach(memoria => {
